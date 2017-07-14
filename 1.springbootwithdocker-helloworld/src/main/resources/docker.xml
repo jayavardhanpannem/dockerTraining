@@ -1,0 +1,157 @@
+
+<build>
+	<from>centos</from>
+	<maintainer>Jayavardhan Pannem</maintainer>
+	<env>
+		<JAVA_VERSION>8u31</JAVA_VERSION>
+		<BUILD_VERSION>b13</BUILD_VERSION>
+	</env>
+
+	<runCmds>
+
+		<runCmd>yum -y upgrade</runCmd>
+		<runCmd>yum -y install wget</runCmd>
+
+		<runCmd>wget --no-cookies --no-check-certificate --header "Cookie:
+			oraclelicense=accept-securebackup-cookie"
+			"http://download.oracle.com/otn-pub/java/jdk/$JAVA_VERSION-$BUILD_VERSION/jdk-$JAVA_VERSION-linux-x64.rpm"
+			-O /tmp/jdk-8-linux-x64.rpm</runCmd>
+		<runCmd>yum -y install /tmp/jdk-8-linux-x64.rpm</runCmd>
+		<runCmd>alternatives --install /usr/bin/java jar
+			/usr/java/latest/bin/java 200000</runCmd>
+		<runCmd>alternatives --install /usr/bin/javaws javaws
+			/usr/java/latest/bin/javaws 200000</runCmd>
+		<runCmd>alternatives --install /usr/bin/javac javac
+			/usr/java/latest/bin/javac 200000</runCmd>
+	</runCmds>
+
+	<volumes>
+		<volume>/tmp</volume>
+	</volumes>
+	<assembly>
+		<descriptorRef>artifact</descriptorRef>
+	</assembly>
+</build>  
+
+
+<!-- Below is the complete xml -->
+
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.deloitte</groupId>
+    <artifactId>springbootdocker-demo</artifactId>
+    <version>0.1.0</version>
+    <packaging>jar</packaging>
+    <name>Spring Boot Docker</name>
+    <description>Getting started with Spring Boot and Docker</description>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>1.5.2.RELEASE</version>
+        <relativePath />
+    </parent>
+
+    <properties>
+        <docker.image.prefix>jayavardhanpannem</docker.image.prefix>
+        <java.version>1.8</java.version>
+    </properties>
+	
+	 <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    
+    <build>
+    	<finalName>springbootdocker-demo</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <!-- tag::plugin[] -->
+            <!-- <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.4.11</version>
+                <configuration>
+                    <imageName>${docker.image.prefix}/${project.artifactId}</imageName>
+                    <dockerDirectory>src/main/docker</dockerDirectory>
+                    <resources>
+                        <resource>
+                            <targetPath>/</targetPath>
+                            <directory>${project.build.directory}</directory>
+                            <include>${project.build.finalName}.jar</include>
+                        </resource>
+                    </resources>
+                </configuration>
+            </plugin> -->
+            
+             <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.17.2</version>
+                <configuration>
+                    <dockerHost>http://127.0.0.1:2375</dockerHost>
+                    <verbose>true</verbose>
+                    <!-- <pullRegistry>docker.io</pullRegistry>
+                    <pushRegistry>docker.io</pushRegistry> -->
+                    <authConfig>
+				      <push>
+				         <username>jayavardhanpannem</username>
+				         <password>Rameshp@123</password>
+				      </push>
+				    </authConfig>
+				    <sourceDirectory>src/main/docker</sourceDirectory>
+				    <outputDirectory>src/dockerImage</outputDirectory>
+                    <images>
+                        <image>
+                            <name>jayavardhanpannem/springbootdocker-demo:${project.version}</name>
+                            <alias>sbd</alias>
+                            <build>
+                                <skip>${env.skip.docker.run}</skip>
+                                <dockerFileDir>${project.basedir}/src/test/docker/ldap</dockerFileDir>
+                            </build>
+                            <run>
+                                <ports>
+                                    <port>localhost:9081:8081</port>
+                                </ports>
+                                <wait>
+                                    <tcp>
+                                        <ports>
+                                            <port>389</port>
+                                        </ports>
+                                    </tcp>
+                                </wait> 
+                            </run>
+                            
+                             <!-- <dockerFile>src/main/docker/</dockerFile> -->
+                            <run>
+                            	<cmd>sh -c 'touch /app.jar'</cmd>
+                            	<entrypoint>"sh", "-c", "java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -jar /springbootdocker-demo.jar"</entrypoint>
+                             
+                            </run>
+                       <!-- <external>
+							     <type>props</type>
+							     <prefix>docker</prefix> this is the default
+							 </external> -->
+                        </image>
+                    </images>
+                </configuration>
+            </plugin>
+            
+            <!-- end::plugin[] -->
+        </plugins>
+    </build>
+
+</project>

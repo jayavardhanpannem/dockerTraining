@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.deloitte</groupId>
+    <artifactId>springbootwithdocker-helloworld</artifactId>
+    <version>0.1.0</version>
+    <packaging>jar</packaging>
+    <name>Spring Boot Docker</name>
+    <description>Getting started with Spring Boot and Docker</description>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>1.5.2.RELEASE</version>
+        <relativePath />
+    </parent>
+
+    <properties>
+        <docker.image.prefix>jayavardhanpannem</docker.image.prefix>
+        <java.version>1.8</java.version>
+         <timestamp>${maven.build.timestamp}</timestamp>
+        <maven.build.timestamp.format>yyyy_MM_dd_HH_mm</maven.build.timestamp.format>
+    </properties>
+	
+	 <dependencies>
+	 
+	 	 <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+ 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+        </dependency>
+ 
+       <!--  <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+ 
+        <dependency>
+            <groupId>org.thymeleaf.extras</groupId>
+            <artifactId>thymeleaf-extras-springsecurity4</artifactId>
+        </dependency> -->
+        
+        <!--testing deps-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    
+    <build>
+    	<finalName>springbootwithdocker-helloworld</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <!-- tag::plugin[] -->
+            <!-- <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.4.11</version>
+                <configuration>
+                    <imageName>${docker.image.prefix}/${project.artifactId}</imageName>
+                    <dockerDirectory>src/main/docker</dockerDirectory>
+                    <resources>
+                        <resource>
+                            <targetPath>/</targetPath>
+                            <directory>${project.build.directory}</directory>
+                            <include>${project.build.finalName}.jar</include>
+                        </resource>
+                    </resources>
+                </configuration>
+            </plugin> -->
+            
+             <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.17.2</version>
+                <configuration>
+                    <dockerHost>http://127.0.0.1:2375</dockerHost>
+                    <verbose>true</verbose>
+                    <!-- <pullRegistry>docker.io</pullRegistry>
+                    <pushRegistry>docker.io</pushRegistry> -->
+                    
+                  <!--   <pullRegistry>quay.io</pullRegistry>
+                    <pushRegistry>quay.io</pushRegistry> -->
+                    
+                    <authConfig>
+				      <push>
+				         <username>jayavardhanpannem</username>
+				         <password>{nf8JIt1eqGkHJ/+Mn5Mz0ZK610avylVI9YnyGC2B12M=}</password>
+				      </push>
+				    </authConfig> 
+				    <sourceDirectory>src/main/docker</sourceDirectory>
+				    <images>
+                        <image>
+                            <name>jayavardhanpannem/springbootwithdocker-helloworld:${maven.build.timestamp}-SNAPSHOT</name>
+                            <alias>springbootwithdocker-helloworld</alias>
+							<build>
+								<tags>
+				                  <tag>latest</tag>
+				               </tags>
+								<dockerFile>Dockerfile</dockerFile>
+								<assembly>
+									<descriptorRef>artifact</descriptorRef>
+								</assembly>
+							</build>
+							<run>
+								<ports>
+									<port>127.0.0.1:9000:9000</port>
+								</ports>
+							</run>
+						
+                            
+                       <!-- <external>
+							     <type>props</type>
+							     <prefix>docker</prefix> this is the default
+							 </external> -->
+                        </image>
+                    </images>
+                </configuration>
+            </plugin>
+            
+            <!-- end::plugin[] -->
+        </plugins>
+    </build>
+
+</project>
